@@ -350,3 +350,185 @@ WHERE DMMH.TenMH = 'Cơ Sở Dữ Liệu' AND LanThi = 1
 GROUP BY MaSV
 ORDER BY DiemCaoNhat DESC
 LIMIT 1;
+/* 41 */ 
+SELECT CONCAT(HoSV, ' ', TenSV) AS HoTen, TIMESTAMPDIFF(YEAR, NgaySinh, CURDATE()) AS Tuoi
+FROM DMSV
+WHERE MaKhoa = 'AV'
+ORDER BY Tuoi DESC
+LIMIT 1;
+
+/* 42 */ 
+SELECT MaKhoa, COUNT(*) AS SoLuongSinhVien
+FROM DMSV
+GROUP BY MaKhoa
+ORDER BY SoLuongSinhVien DESC
+LIMIT 1;
+
+/* 43 */ 
+SELECT MaKhoa, COUNT(*) AS SoLuongNu
+FROM DMSV
+WHERE Phai = 'Nữ'
+GROUP BY MaKhoa
+ORDER BY SoLuongNu DESC
+LIMIT 1;
+
+/* 44 */ 
+SELECT MaMH, COUNT(*) AS SoSinhVienRotLan1
+FROM KetQua
+WHERE LanThi = 1 AND Diem < 5
+GROUP BY MaMH
+ORDER BY SoSinhVienRotLan1 DESC
+LIMIT 1;
+
+/* 45 */ 
+SELECT CONCAT(HoSV, ' ', TenSV) AS HoTen
+FROM DMSV
+WHERE MaKhoa != 'AV' AND MaSV IN (
+    SELECT MaSV
+    FROM KetQua
+    WHERE MaMH = '05' AND Diem > (
+        SELECT MAX(Diem) FROM KetQua
+        WHERE MaKhoa = 'AV' AND MaMH = '05'
+    )
+);
+
+/* 46 */ 
+SELECT CONCAT(HoSV, ' ', TenSV) AS HoTen
+FROM DMSV
+WHERE NoiSinh = 'Hải';
+
+/* 47 */ 
+SELECT CONCAT(HoSV, ' ', TenSV) AS HoTen
+FROM DMSV
+WHERE HocBong > (
+    SELECT MAX(HocBong) FROM DMSV WHERE MaKhoa = 'AV'
+);
+
+/* 48 */ 
+SELECT CONCAT(HoSV, ' ', TenSV) AS HoTen
+FROM DMSV
+WHERE HocBong > ALL (
+    SELECT HocBong FROM DMSV WHERE MaKhoa = 'AV'
+);
+
+/* 49 */ 
+SELECT MaSV, MAX(Diem) AS DiemThiLan2
+FROM KetQua
+WHERE MaMH = '01' AND LanThi = 2
+GROUP BY MaSV
+HAVING DiemThiLan2 > ALL (
+    SELECT Diem FROM KetQua WHERE MaMH = '01' AND LanThi = 1
+);
+
+/* 50 */ 
+SELECT MaSV, MaMH, MAX(Diem) AS DiemCaoNhat
+FROM KetQua
+GROUP BY MaMH;
+
+/* 51 */ 
+SELECT MaKhoa
+FROM DMKhoa
+WHERE MaKhoa NOT IN (SELECT DISTINCT MaKhoa FROM DMSV);
+
+/* 52 */ 
+SELECT MaSV, CONCAT(HoSV, ' ', TenSV) AS HoTen
+FROM DMSV
+WHERE MaSV NOT IN (
+    SELECT DISTINCT MaSV FROM KetQua WHERE MaMH = '01'
+);
+
+/* 53 */ 
+SELECT MaSV, CONCAT(HoSV, ' ', TenSV) AS HoTen
+FROM DMSV
+WHERE MaSV IN (
+    SELECT MaSV FROM KetQua WHERE LanThi = 2 AND MaMH = '01'
+) AND MaSV NOT IN (
+    SELECT MaSV FROM KetQua WHERE LanThi = 1 AND MaMH = '01'
+);
+
+/* 54 */ 
+SELECT MaMH
+FROM DMMH
+WHERE MaMH NOT IN (
+    SELECT DISTINCT MaMH FROM DMSV WHERE MaKhoa = 'AV'
+);
+
+/* 55 */ 
+SELECT MaSV, CONCAT(HoSV, ' ', TenSV) AS HoTen
+FROM DMSV
+WHERE MaKhoa = 'AV' AND MaSV NOT IN (
+    SELECT DISTINCT MaSV FROM KetQua WHERE MaMH = '05'
+);
+
+/* 56 */ 
+SELECT CONCAT(HoSV, ' ', TenSV) AS HoTen
+FROM DMSV
+WHERE MaSV NOT IN (
+    SELECT DISTINCT MaSV FROM KetQua WHERE Diem < 5
+);
+
+/* 57 */ 
+SELECT CONCAT(HoSV, ' ', TenSV) AS HoTen
+FROM DMSV
+WHERE MaKhoa = 'AV' AND HocBong > 0
+UNION
+SELECT CONCAT(HoSV, ' ', TenSV) AS HoTen
+FROM DMSV
+WHERE MaSV NOT IN (
+    SELECT DISTINCT MaSV FROM KetQua WHERE Diem < 5
+);
+
+/* 58 */ 
+SELECT MaKhoa, COUNT(*) AS SoLuongSinhVienHocBong
+FROM DMSV
+WHERE HocBong > 0
+GROUP BY MaKhoa
+ORDER BY SoLuongSinhVienHocBong DESC
+LIMIT 1;
+
+SELECT MaKhoa, COUNT(*) AS SoLuongSinhVienHocBong
+FROM DMSV
+WHERE HocBong > 0
+GROUP BY MaKhoa
+ORDER BY SoLuongSinhVienHocBong ASC
+LIMIT 1;
+
+/* 59 */ 
+SELECT MaSV, COUNT(DISTINCT MaMH) AS SoMonHoc
+FROM KetQua
+GROUP BY MaSV
+ORDER BY SoMonHoc DESC
+LIMIT 3;
+
+/* 60 */ 
+SELECT MaMH
+FROM DMMH
+WHERE MaMH NOT IN (
+    SELECT DISTINCT MaMH FROM KetQua
+    GROUP BY MaMH
+    HAVING COUNT(DISTINCT MaSV) < (SELECT COUNT(*) FROM DMSV)
+);
+
+/* 61 */ 
+SELECT CONCAT(HoSV, ' ', TenSV) AS HoTen
+FROM DMSV
+WHERE MaSV IN (
+    SELECT MaSV
+    FROM KetQua
+    WHERE MaMH IN (
+        SELECT MaMH FROM KetQua WHERE MaSV = 'A02'
+    )
+);
+
+/* 62 */ 
+SELECT CONCAT(HoSV, ' ', TenSV) AS HoTen
+FROM DMSV
+WHERE MaSV IN (
+    SELECT MaSV
+    FROM KetQua
+    WHERE MaMH IN (
+        SELECT MaMH FROM KetQua WHERE MaSV = 'A02'
+    )
+    GROUP BY MaSV
+    HAVING COUNT(DISTINCT MaMH) = (SELECT COUNT(DISTINCT MaMH) FROM KetQua WHERE MaSV = 'A02')
+);
